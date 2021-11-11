@@ -64,6 +64,8 @@ pub enum Key {
     Char(char),
     Ctrl(char),
     Alt(char),
+    ShiftUp,
+    ShiftDown,
     Unknown,
 }
 
@@ -127,6 +129,16 @@ impl From<event::KeyEvent> for Key {
                 code: event::KeyCode::Esc,
                 ..
             } => Key::Esc,
+
+            event::KeyEvent {
+                code: event::KeyCode::Up,
+                modifiers: event::KeyModifiers::SHIFT,
+            } => Key::ShiftUp,
+            event::KeyEvent {
+                code: event::KeyCode::Down,
+                modifiers: event::KeyModifiers::SHIFT,
+            } => Key::ShiftDown,
+
             event::KeyEvent {
                 code: event::KeyCode::Backspace,
                 ..

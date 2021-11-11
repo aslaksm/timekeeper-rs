@@ -1,6 +1,6 @@
 use crate::app::App;
 use crate::event::Key;
-mod common_key_events;
+pub mod common_key_events;
 mod timesheet;
 
 pub fn handle_app(key: Key, app: &mut App) {

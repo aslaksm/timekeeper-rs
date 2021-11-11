@@ -23,11 +23,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut terminal = Terminal::new(backend)?;
     terminal.hide_cursor()?;
+    let mut cursor_shown = false;
 
     let events = event::Events::new(250);
 
+    terminal.draw(|f| ui::draw_main_layout(f, &app))?;
     loop {
-        terminal.draw(|f| ui::draw_main_layout(f, &app))?;
         match events.next()? {
             event::Event::Input(key) => {
                 if key == event::Key::Ctrl('c') {
@@ -35,9 +36,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                 } else {
                     handlers::handle_app(key, &mut app);
                 }
+                terminal.draw(|f| ui::draw_main_layout(f, &app))?;
             }
             event::Event::Tick => (),
         }
+        // if app.should_show_cursor() && cursor_shown == false {
+        //     terminal.show_cursor()?;
+        // } else if !app.should_show_cursor() && cursor_shown == true {
+        //     terminal.hide_cursor()?;
+        // }
     }
 
     terminal.show_cursor()?;

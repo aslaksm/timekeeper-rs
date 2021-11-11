@@ -1,11 +1,11 @@
 use tui::backend::Backend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Text};
+use tui::text::{Span, Spans};
 use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
 use tui::Frame;
 
-use crate::app::{App, Day};
+use crate::app::{App, Day, State};
 
 pub fn draw_main_layout<B>(f: &mut Frame<B>, app: &App)
 where
@@ -47,6 +47,7 @@ where
         .split(main_layout[1]);
 
     // Innholdsinndelinga (timecode-label, timer, kommentar)
+    let comment_col_width = 10;
     let content_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(
@@ -59,7 +60,7 @@ where
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),
-                Constraint::Percentage(10),
+                Constraint::Length(comment_col_width),
             ]
             .as_ref(),
         )
@@ -190,8 +191,21 @@ where
         Some(d) => d.comment.clone(),
         None => String::from(""),
     };
-    let comment_box = Paragraph::new(comment)
-        .style(Style::default().fg(Color::LightYellow))
+    let styled_comment = Spans::from(if app.should_show_cursor() {
+        vec![
+            Span::styled(comment, Style::default().fg(Color::LightYellow)),
+            Span::styled(
+                String::from("|"),
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::SLOW_BLINK),
+            ),
+        ]
+    } else {
+        vec![Span::styled(String::from(comment), Style::default())]
+    });
+    let comment_box = Paragraph::new(styled_comment)
+        .style(Style::default().fg(Color::Yellow))
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true })
         .block(
@@ -204,7 +218,7 @@ where
     f.render_widget(comment_box, comment_layout[0]);
 
     // Bør kunne vises og skjules
-    let controls = Paragraph::new("h - Venstre, l - høyre")
+    let controls = Paragraph::new("Navigering: hjkl eller piltaster")
         .style(Style::default().fg(Color::LightCyan))
         .alignment(Alignment::Center)
         .block(
