@@ -1,0 +1,44 @@
+{
+  "2021": {
+    "1": [
+      {
+        "timecode": "KOM1000",
+        "monday": {
+          "hours": 0.0,
+          "comment": "I dag gjorde jeg noe"
+        },
+        "tuesday": {
+          "hours": 0.0,
+          "comment": "I dag gjorde jeg noe annet"
+        },
+        "thursday": {
+          "hours": 0.0,
+          "comment": ""
+        },
+        "friday": {
+          "hours": 0.0,
+          "comment": ""
+        }
+      },
+      {
+        "timecode": "KOM1001",
+        "monday": {
+          "hours": 1.5,
+          "comment": "I dag gjorde jeg noe"
+        },
+        "wednesday": {
+          "hours": 4.5,
+          "comment": "Ding dong"
+        },
+        "thursday": {
+          "hours": 12.0,
+          "comment": ""
+        },
+        "friday": {
+          "hours": 5.5,
+          "comment": ""
+        }
+      }
+    ]
+  }
+}
