@@ -47,12 +47,18 @@ impl App {
             .get_mut(self.active_timecode)?;
         Some(tc)
     }
-    // pub fn get_active_day(&mut self) -> Option<&mut Day> {
+    // pub fn get_active_day_mut(&mut self) -> Option<&mut Day> {
     //     let a = ((((self.data.get_mut(self.active_year)?).get_mut(self.active_week))?)
     //         .get_mut(self.active_timecode)?)
     //     .get_mut(self.active_day)?;
     //     Some(a)
     // }
+    pub fn get_active_day(&self) -> Option<&Day> {
+        let a = ((((self.data.get(self.active_year)?).get(self.active_week))?)
+            .get(self.active_timecode)?)
+        .get(self.active_day)?;
+        Some(a)
+    }
     pub fn next_timecode(&mut self) {
         if self.active_timecode < self.timecodes.len() - 1 {
             self.active_timecode += 1;
@@ -181,6 +187,18 @@ impl Timecode {
             4 => self.friday.as_mut(),
             5 => self.saturday.as_mut(),
             6 => self.sunday.as_mut(),
+            _ => None,
+        }
+    }
+    fn get(&self, day: u8) -> Option<&Day> {
+        match day {
+            0 => self.monday.as_ref(),
+            1 => self.tuesday.as_ref(),
+            2 => self.wednesday.as_ref(),
+            3 => self.thursday.as_ref(),
+            4 => self.friday.as_ref(),
+            5 => self.saturday.as_ref(),
+            6 => self.sunday.as_ref(),
             _ => None,
         }
     }

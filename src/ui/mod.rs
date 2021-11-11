@@ -1,8 +1,8 @@
 use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Row, Table};
+use tui::text::{Span, Text};
+use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
 use tui::Frame;
 
 use crate::app::{App, Day};
@@ -11,20 +11,22 @@ pub fn draw_main_layout<B>(f: &mut Frame<B>, app: &App)
 where
     B: Backend,
 {
+    // Hovedinndelinga
     let main_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(70),
+                Constraint::Length(1),
+                Constraint::Length(4),
+                Constraint::Min(5),
                 Constraint::Length(3),
             ]
             .as_ref(),
         )
-        .margin(1)
+        .margin(0)
         .split(f.size());
 
+    // Headeren for dager (Der det står Mandag, Tirsdag etc)
     let day_header_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(
@@ -41,8 +43,10 @@ where
             ]
             .as_ref(),
         )
-        .margin(1)
+        .margin(0)
         .split(main_layout[1]);
+
+    // Innholdsinndelinga (timecode-label, timer, kommentar)
     let content_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(
@@ -59,8 +63,10 @@ where
             ]
             .as_ref(),
         )
-        .margin(1)
+        .margin(0)
         .split(main_layout[2]);
+
+    // Timecode-label inndeling
     let tc_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
@@ -73,8 +79,17 @@ where
             ]
             .as_ref(),
         )
-        .margin(1)
+        .margin(0)
         .split(content_layout[0]);
+
+    // Kommentar (høyre side)
+    let comment_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(100)].as_ref())
+        .margin(0)
+        .split(content_layout[8]);
+
+    // Dag-inndelinger
     let make_day_layout = |idx: usize| {
         Layout::default()
             .direction(Direction::Vertical)
@@ -88,7 +103,7 @@ where
                 ]
                 .as_ref(),
             )
-            .margin(1)
+            .margin(0)
             .split(content_layout[1 + idx])
     };
 
@@ -170,6 +185,23 @@ where
             }
         }
     }
+
+    let comment = match app.get_active_day() {
+        Some(d) => d.comment.clone(),
+        None => String::from(""),
+    };
+    let comment_box = Paragraph::new(comment)
+        .style(Style::default().fg(Color::LightYellow))
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true })
+        .block(
+            Block::default()
+                .borders(Borders::LEFT)
+                .style(Style::default().fg(Color::White))
+                .title("Kommentar")
+                .border_type(BorderType::Plain),
+        );
+    f.render_widget(comment_box, comment_layout[0]);
 
     // Bør kunne vises og skjules
     let controls = Paragraph::new("h - Venstre, l - høyre")
