@@ -7,7 +7,6 @@ use crate::event::Key;
 pub fn handle(key: Key, app: &mut App) {
     match app.get_state() {
         State::Browsing => handle_browsing(key, app),
-        // State::Selected => handle_selected(key, app),
         State::WritingComment => handle_comment_input(key, app),
     }
 }
@@ -18,8 +17,7 @@ pub fn handle_browsing(key: Key, app: &mut App) {
         k if common_key_events::up_event(k) => app.prev_timecode(),
         k if common_key_events::left_event(k) => app.prev_day(),
         k if common_key_events::right_event(k) => app.next_day(),
-        // k if common_key_events::toggle_select_event(k) => app.toggle_select(),
-        k if common_key_events::write_event(k) => app.write(),
+        k if common_key_events::save_event(k) => app.write(),
         k if common_key_events::toggle_comment_event(k) => app.toggle_writing_comment(),
         k if common_key_events::inc_event(k) => app.change_hours(0.5),
         k if common_key_events::dec_event(k) => app.change_hours(-0.5),
@@ -33,7 +31,7 @@ pub fn handle_browsing(key: Key, app: &mut App) {
 pub fn handle_selected(key: Key, app: &mut App) {
     match key {
         // k if common_key_events::toggle_select_event(k) => app.toggle_select(),
-        k if common_key_events::write_event(k) => app.write(),
+        k if common_key_events::save_event(k) => app.write(),
         _ => (),
     }
 }

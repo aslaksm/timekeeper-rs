@@ -1,29 +1,36 @@
+mod top_bar;
+
 use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::text::{Span, Spans};
 use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
 use tui::Frame;
 
-use crate::app::{App, Day, State};
+use crate::app::{App, Day};
+use crate::ui::top_bar::draw_top_bar;
 
+// TODO: REFACTOR
+// TODO: i18n
 pub fn draw_main_layout<B>(f: &mut Frame<B>, app: &App)
 where
     B: Backend,
 {
+    let t_width = f.size().width;
+    // let t_height = f.size().height;
+
     // Hovedinndelinga
     let main_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Length(1),
-                Constraint::Length(4),
+                Constraint::Length(2),
+                Constraint::Length(3),
                 Constraint::Min(5),
                 Constraint::Length(3),
             ]
             .as_ref(),
         )
-        .margin(0)
         .split(f.size());
 
     // Headeren for dager (Der det står Mandag, Tirsdag etc)
@@ -31,64 +38,39 @@ where
         .direction(Direction::Horizontal)
         .constraints(
             [
-                Constraint::Percentage(20),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
+                Constraint::Percentage(15),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Percentage(15),
             ]
             .as_ref(),
         )
-        .margin(0)
         .split(main_layout[1]);
 
     // Innholdsinndelinga (timecode-label, timer, kommentar)
-    let comment_col_width = 10;
     let content_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(
             [
-                Constraint::Percentage(20),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Length(comment_col_width),
+                Constraint::Percentage(15),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Length(t_width / 10),
+                Constraint::Percentage(15),
             ]
             .as_ref(),
         )
-        .margin(0)
         .split(main_layout[2]);
-
-    // Timecode-label inndeling
-    let tc_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(
-            [
-                Constraint::Percentage(20),
-                Constraint::Percentage(20),
-                Constraint::Percentage(20),
-                Constraint::Percentage(20),
-                Constraint::Percentage(20),
-            ]
-            .as_ref(),
-        )
-        .margin(0)
-        .split(content_layout[0]);
-
-    // Kommentar (høyre side)
-    let comment_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(100)].as_ref())
-        .margin(0)
-        .split(content_layout[8]);
 
     // Dag-inndelinger
     let make_day_layout = |idx: usize| {
@@ -104,12 +86,13 @@ where
                 ]
                 .as_ref(),
             )
-            .margin(0)
             .split(content_layout[1 + idx])
     };
 
     let mut day_layouts = vec![];
     (0..7_usize).for_each(|i| day_layouts.push(make_day_layout(i)));
+
+    draw_top_bar(f, app, &main_layout);
 
     let to_span = |a| Span::styled(a, Style::default());
     let header = vec![
@@ -145,10 +128,13 @@ where
         // RENDER: Timecode labels
         let tc_str = if app.active_timecode == idx {
             Paragraph::new(tc.timecode.clone())
+                .wrap(Wrap { trim: true })
                 .style(Style::default().add_modifier(Modifier::BOLD))
                 .block(Block::default().borders(Borders::ALL))
         } else {
-            Paragraph::new(tc.timecode.clone()).block(Block::default().borders(Borders::ALL))
+            Paragraph::new(tc.timecode.clone())
+                .wrap(Wrap { trim: true })
+                .block(Block::default().borders(Borders::ALL))
         };
         f.render_widget(tc_str, tc_layout[idx])
     }
@@ -215,7 +201,7 @@ where
                 .title("Kommentar")
                 .border_type(BorderType::Plain),
         );
-    f.render_widget(comment_box, comment_layout[0]);
+    f.render_widget(comment_box, content_layout[8]);
 
     // Bør kunne vises og skjules
     let controls = Paragraph::new("Navigering: hjkl eller piltaster")

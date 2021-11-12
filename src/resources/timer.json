@@ -4,38 +4,50 @@
       {
         "timecode": "KOM1000",
         "monday": {
-          "hours": 0.0,
+          "hours": 7.5,
           "comment": "I dag gjorde jeg noe litt kult"
         },
         "tuesday": {
-          "hours": 0.0,
+          "hours": 7.5,
           "comment": "I dag gjorde jeg noe annet"
         },
+        "wednesday": {
+          "hours": 7.5,
+          "comment": "Hei hei"
+        },
         "thursday": {
-          "hours": 0.0,
-          "comment": ""
+          "hours": 7.5,
+          "comment": "På torsdag gjorde jeg mye gøy!!"
         },
         "friday": {
-          "hours": 0.0,
+          "hours": 7.5,
           "comment": ""
+        },
+        "saturday": {
+          "hours": 0.0,
+          "comment": "Kommentar her."
         }
       },
       {
         "timecode": "KOM1001",
         "monday": {
-          "hours": 1.5,
+          "hours": 7.5,
           "comment": "I dag gjorde jeg noe"
         },
+        "tuesday": {
+          "hours": 7.5,
+          "comment": ""
+        },
         "wednesday": {
-          "hours": 4.5,
+          "hours": 7.5,
           "comment": "Ding dong"
         },
         "thursday": {
-          "hours": 12.0,
+          "hours": 7.5,
           "comment": ""
         },
         "friday": {
-          "hours": 5.5,
+          "hours": 7.5,
           "comment": ""
         }
       }

@@ -1,9 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use std::fs::{self, File};
-
-const DAY_INC: f32 = 0.5;
+use std::fs;
 
 #[derive(PartialEq)]
 pub enum State {
@@ -79,13 +77,6 @@ impl App {
             self.active_day -= 1;
         }
     }
-    // pub fn toggle_select(&mut self) {
-    //     if self.get_state() == &State::Browsing {
-    //         self.state.push(State::Selected);
-    //     } else if self.get_state() == &State::Selected {
-    //         self.state.pop();
-    //     }
-    // }
 
     pub fn toggle_writing_comment(&mut self) {
         if self.get_state() == &State::Browsing {

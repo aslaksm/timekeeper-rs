@@ -23,9 +23,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut terminal = Terminal::new(backend)?;
     terminal.hide_cursor()?;
-    let mut cursor_shown = false;
 
     let events = event::Events::new(250);
+    let mut tick = 0;
 
     terminal.draw(|f| ui::draw_main_layout(f, &app))?;
     loop {
@@ -38,13 +38,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
                 terminal.draw(|f| ui::draw_main_layout(f, &app))?;
             }
-            event::Event::Tick => (),
+            event::Event::Tick => {
+                tick += 1;
+                // Draw every so often in case of resize
+                if tick % 2 == 0 {
+                    terminal.draw(|f| ui::draw_main_layout(f, &app))?;
+                }
+            }
         }
-        // if app.should_show_cursor() && cursor_shown == false {
-        //     terminal.show_cursor()?;
-        // } else if !app.should_show_cursor() && cursor_shown == true {
-        //     terminal.hide_cursor()?;
-        // }
     }
 
     terminal.show_cursor()?;
