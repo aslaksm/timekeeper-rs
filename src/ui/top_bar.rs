@@ -1,7 +1,7 @@
 use crate::app::App;
 use chrono::Datelike;
 use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Modifier, Style};
 use tui::text::{Span, Spans};
 use tui::widgets::{Block, Borders, Paragraph, Wrap};
@@ -38,7 +38,6 @@ where
     ]);
     let year_week_p = Paragraph::new(year_week_spans)
         .wrap(Wrap { trim: true })
-        .style(Style::default().add_modifier(Modifier::BOLD))
         .block(Block::default().borders(Borders::ALL));
     // .block(Block::default().borders(Borders::BOTTOM | Borders::RIGHT));
     f.render_widget(year_week_p, top_bar_layout[0]);
@@ -55,7 +54,6 @@ where
             } else {
                 Style::default()
             })
-            // .block(Block::default().borders(Borders::BOTTOM | Borders::RIGHT | Borders::LEFT));
             .block(Block::default().borders(Borders::ALL));
 
         f.render_widget(d, top_bar_layout[1 + idx]);

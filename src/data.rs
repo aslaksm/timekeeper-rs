@@ -38,12 +38,28 @@ impl TimekeeperData {
             .push(timecode);
     }
 
+    pub fn remove_timecode(&mut self, week: u8, year: usize, timecode: String) {
+        self.get_mut(year)
+            .unwrap()
+            .get_mut(week)
+            .unwrap()
+            .0
+            .retain(|tc| tc.timecode != timecode);
+    }
+
     pub fn create_week_if_not_exists(&mut self, week: u8, year: usize, timecodes: Vec<Timecode>) {
         let year_data = self
             .0
             .entry(year)
             .or_insert(Year(HashMap::<u8, Week>::new()));
-        year_data.0.entry(week).or_insert(Week(timecodes));
+        match year_data.0.get_mut(&week) {
+            Some(w) => {
+                w.add_timecodes(timecodes);
+            }
+            None => {
+                year_data.0.insert(week, Week(timecodes));
+            }
+        };
     }
 }
 
@@ -73,6 +89,13 @@ impl Week {
             Some(&mut self.0[timecode])
         } else {
             None
+        }
+    }
+    pub fn add_timecodes(&mut self, timecodes: Vec<Timecode>) {
+        for new_tc in timecodes {
+            if let None = self.0.iter().find(|tc| tc.timecode == new_tc.timecode) {
+                self.0.push(new_tc);
+            }
         }
     }
 }

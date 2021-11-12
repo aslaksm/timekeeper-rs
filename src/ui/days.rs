@@ -1,5 +1,5 @@
 use crate::app::App;
-use crate::timekeeper_data::Day;
+use crate::data::Day;
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Modifier, Style};

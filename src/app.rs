@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::timekeeper_data::{Day, Timecode, TimekeeperData, Week, Year};
+use crate::data::{Day, Timecode, TimekeeperData, Week, Year};
 use chrono::Datelike;
 use std::collections::HashMap;
 use std::error::Error;
@@ -243,6 +243,10 @@ impl App {
             self.state.pop();
         }
     }
+    pub fn cancel_adding_timecode(&mut self) {
+        self.flush_timecode_buffer();
+        self.state.pop();
+    }
     pub fn add_timecode(&mut self, timecode: String) {
         self.timecodes.push(timecode.clone());
         self.conf.add_timecode(timecode.clone());
@@ -250,5 +254,11 @@ impl App {
         self.data
             .add_timecode(self.active_week, self.active_year, tc);
     }
-    // pub fn remove_timecode(&mut self) {}
+    pub fn remove_timecode(&mut self) {
+        let timecode = self.timecodes[self.active_timecode].clone();
+        self.conf.remove_timecode(&timecode);
+        self.timecodes.retain(|tc| tc != &timecode);
+        self.data
+            .remove_timecode(self.active_week, self.active_year, timecode);
+    }
 }

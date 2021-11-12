@@ -20,6 +20,7 @@ impl Config {
         match config_js {
             Ok(c) => serde_json::from_str(&c).expect("ERR: config file corrupted!"),
             _ => {
+                // TODO: When this expands, impl default for config
                 let new_conf = Config { timecodes: vec![] };
                 fs::write(
                     &filepath,
@@ -50,6 +51,10 @@ impl Config {
 
     pub fn add_timecode(&mut self, timecode: String) {
         self.timecodes.push(timecode);
+        self.write();
+    }
+    pub fn remove_timecode(&mut self, timecode: &String) {
+        self.timecodes.retain(|tc| tc != timecode);
         self.write();
     }
     pub fn write(&self) {
