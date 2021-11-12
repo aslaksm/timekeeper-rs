@@ -5,21 +5,16 @@ mod days;
 mod tc_labels;
 mod top_bar;
 
-use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
-use tui::Frame;
-
-use crate::app::{App, Day};
-use crate::ui::day_headers::draw_day_headers;
-use crate::ui::tc_labels::draw_timecode_labels;
-use crate::ui::top_bar::draw_top_bar;
-
 use self::comment::draw_comment;
 use self::controls::draw_controls;
 use self::days::draw_days;
+use crate::app::App;
+use crate::ui::day_headers::draw_day_headers;
+use crate::ui::tc_labels::draw_timecode_labels;
+use crate::ui::top_bar::draw_top_bar;
+use tui::backend::Backend;
+use tui::layout::{Constraint, Direction, Layout};
+use tui::Frame;
 
 // TODO: i18n
 pub fn draw_main_layout<B>(f: &mut Frame<B>, app: &App)

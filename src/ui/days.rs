@@ -1,11 +1,10 @@
+use crate::app::App;
+use crate::timekeeper_data::Day;
 use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
+use tui::layout::{Constraint, Direction, Layout, Rect};
+use tui::style::{Modifier, Style};
+use tui::widgets::{Block, BorderType, Borders, Paragraph};
 use tui::Frame;
-
-use crate::app::{App, Day};
 
 pub fn draw_days<B>(f: &mut Frame<B>, app: &App, content_layout: &Vec<Rect>)
 where
@@ -41,7 +40,7 @@ where
         None => days[day_idx].push(-1.0_f32),
     };
 
-    for (idx, tc) in week.0.iter().enumerate() {
+    for (_idx, tc) in week.0.iter().enumerate() {
         codes.push(tc.timecode.clone());
         handle(&tc.monday, 0);
         handle(&tc.tuesday, 1);

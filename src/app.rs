@@ -1,3 +1,6 @@
+use crate::config;
+use crate::timekeeper_data::{Day, Timecode, TimekeeperData, Week, Year};
+use chrono::Datelike;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
@@ -21,17 +24,34 @@ pub struct App {
 }
 impl App {
     pub fn new(filepath: &'static str) -> Result<App, Box<dyn Error>> {
-        let timer_js = fs::read_to_string(filepath)?;
-        let data: TimekeeperData = serde_json::from_str(&timer_js)?;
-        let active_week = 1;
-        let active_year = 2021;
+        let current_date = chrono::Utc::now();
+
+        let timer_js = fs::read_to_string(filepath);
+        let mut data: TimekeeperData = match timer_js {
+            Ok(t) => serde_json::from_str(&t)?,
+            _ => TimekeeperData(HashMap::<usize, Year>::new()),
+        };
+
+        let active_week = current_date.iso_week().week() as u8;
+        let active_year = current_date.year() as usize;
+        let active_day = current_date.weekday().num_days_from_monday() as u8;
         let timecodes = data.get_timecodes(active_year, active_week);
+
+        data.create_week_if_not_exists(
+            active_week,
+            active_year,
+            timecodes
+                .clone()
+                .into_iter()
+                .map(|tc| Timecode::from_string(tc))
+                .collect(),
+        );
         Ok(App {
             filepath,
             data,
             timecodes,
             active_timecode: 0,
-            active_day: 0,
+            active_day,
             active_week,
             active_year,
             state: vec![State::Browsing],
@@ -151,111 +171,4 @@ impl App {
     pub fn should_show_cursor(&self) -> bool {
         matches!(self.get_state(), State::WritingComment)
     }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct TimekeeperData(HashMap<usize, Year>);
-
-impl TimekeeperData {
-    pub fn get(&self, year: usize) -> Option<&Year> {
-        Some(self.0.get(&year)?)
-    }
-    pub fn get_mut(&mut self, year: usize) -> Option<&mut Year> {
-        Some(self.0.get_mut(&year)?)
-    }
-
-    fn get_timecodes(&self, year: usize, week: u8) -> Vec<String> {
-        let tcs = self.get(year).and_then(|y| y.get(week));
-        match tcs {
-            Some(w) => w.0.iter().map(|t| t.timecode.clone()).collect(),
-            None => vec![],
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Year(HashMap<u8, Week>);
-impl Year {
-    pub fn get(&self, week: u8) -> Option<&Week> {
-        Some(self.0.get(&week)?)
-    }
-    pub fn get_mut(&mut self, week: u8) -> Option<&mut Week> {
-        Some(self.0.get_mut(&week)?)
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Week(pub Vec<Timecode>);
-impl Week {
-    pub fn get(&self, timecode: usize) -> Option<&Timecode> {
-        Some(&self.0[timecode])
-    }
-    pub fn get_mut(&mut self, timecode: usize) -> Option<&mut Timecode> {
-        Some(&mut self.0[timecode])
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Timecode {
-    pub timecode: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub monday: Option<Day>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tuesday: Option<Day>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub wednesday: Option<Day>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub thursday: Option<Day>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub friday: Option<Day>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub saturday: Option<Day>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sunday: Option<Day>,
-}
-
-impl Timecode {
-    fn get_mut(&mut self, day: u8) -> Option<&mut Day> {
-        match day {
-            0 => self.monday.as_mut(),
-            1 => self.tuesday.as_mut(),
-            2 => self.wednesday.as_mut(),
-            3 => self.thursday.as_mut(),
-            4 => self.friday.as_mut(),
-            5 => self.saturday.as_mut(),
-            6 => self.sunday.as_mut(),
-            _ => None,
-        }
-    }
-    fn get(&self, day: u8) -> Option<&Day> {
-        match day {
-            0 => self.monday.as_ref(),
-            1 => self.tuesday.as_ref(),
-            2 => self.wednesday.as_ref(),
-            3 => self.thursday.as_ref(),
-            4 => self.friday.as_ref(),
-            5 => self.saturday.as_ref(),
-            6 => self.sunday.as_ref(),
-            _ => None,
-        }
-    }
-    fn set_day(&mut self, day_idx: u8, day: Day) {
-        let day = Some(day);
-        match day_idx {
-            0 => self.monday = day,
-            1 => self.tuesday = day,
-            2 => self.wednesday = day,
-            3 => self.thursday = day,
-            4 => self.friday = day,
-            5 => self.saturday = day,
-            6 => self.sunday = day,
-            _ => panic!("ERR: Invalid date passed to set_day!"),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Day {
-    pub hours: f32,
-    pub comment: String,
 }

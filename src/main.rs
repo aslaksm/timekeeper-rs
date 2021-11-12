@@ -1,6 +1,8 @@
 mod app;
+mod config;
 mod event;
 mod handlers;
+mod timekeeper_data;
 mod ui;
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use crossterm::execute;

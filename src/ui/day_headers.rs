@@ -1,11 +1,10 @@
+use crate::app::App;
 use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Paragraph, Wrap};
+use tui::layout::{Constraint, Direction, Layout, Rect};
+use tui::style::{Modifier, Style};
+use tui::text::Span;
+use tui::widgets::{Block, Borders, Paragraph};
 use tui::Frame;
-
-use crate::app::{App, Day};
 
 pub fn draw_day_headers<B>(f: &mut Frame<B>, app: &App, layout: &Rect)
 where
