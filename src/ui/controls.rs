@@ -11,12 +11,10 @@ where
 {
     // Bør kunne vises og skjules
     let controls = Paragraph::new("Navigering: hjkl eller piltaster")
-        .style(Style::default().fg(Color::LightCyan))
         .alignment(Alignment::Center)
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .style(Style::default().fg(Color::White))
                 .title("Kontrols")
                 .border_type(BorderType::Plain),
         );

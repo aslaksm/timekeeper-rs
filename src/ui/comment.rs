@@ -34,6 +34,7 @@ where
         .block(
             Block::default()
                 .borders(Borders::LEFT)
+                // FIXME: Not gr8 with white background terminals
                 .style(Style::default().fg(Color::White))
                 .title("Kommentar")
                 .border_type(BorderType::Plain),

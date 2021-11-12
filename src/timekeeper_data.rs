@@ -2,32 +2,43 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
-pub struct TimekeeperData(pub(crate) HashMap<usize, Year>);
+pub struct TimekeeperData(pub HashMap<usize, Year>);
 
 impl TimekeeperData {
     pub fn get(&self, year: usize) -> Option<&Year> {
         Some(self.0.get(&year)?)
     }
+
     pub fn get_mut(&mut self, year: usize) -> Option<&mut Year> {
         Some(self.0.get_mut(&year)?)
     }
 
-    pub(crate) fn get_timecodes(&self, year: usize, week: u8) -> Vec<String> {
+    pub fn get_timecodes(&self, conf_timecodes: Vec<String>, year: usize, week: u8) -> Vec<String> {
         let tcs = self.get(year).and_then(|y| y.get(week));
-        match tcs {
+        let mut tcs = match tcs {
             Some(w) => w.0.iter().map(|t| t.timecode.clone()).collect(),
             None => vec![],
+        };
+        // XXX: This may cause different ordering depending on circumstances
+        for code in conf_timecodes {
+            if !tcs.contains(&code) {
+                tcs.push(code);
+            }
         }
+        tcs
     }
-    // Some(y) => y,
-    // None => self.0.insert(year, ).get()
 
-    pub(crate) fn create_week_if_not_exists(
-        &mut self,
-        week: u8,
-        year: usize,
-        timecodes: Vec<Timecode>,
-    ) {
+    pub fn add_timecode(&mut self, week: u8, year: usize, timecode: Timecode) {
+        let a = self
+            .get_mut(year)
+            .unwrap()
+            .get_mut(week)
+            .unwrap()
+            .0
+            .push(timecode);
+    }
+
+    pub fn create_week_if_not_exists(&mut self, week: u8, year: usize, timecodes: Vec<Timecode>) {
         let year_data = self
             .0
             .entry(year)
@@ -37,7 +48,7 @@ impl TimekeeperData {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Year(pub(crate) HashMap<u8, Week>);
+pub struct Year(pub HashMap<u8, Week>);
 impl Year {
     pub fn get(&self, week: u8) -> Option<&Week> {
         Some(self.0.get(&week)?)
@@ -48,7 +59,7 @@ impl Year {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Week(pub(crate) Vec<Timecode>);
+pub struct Week(pub Vec<Timecode>);
 impl Week {
     pub fn get(&self, timecode: usize) -> Option<&Timecode> {
         if timecode < self.0.len() {
@@ -124,7 +135,7 @@ impl Timecode {
         }
     }
     // impl From seems too implicit for this
-    pub(crate) fn from_string(tc_string: String) -> Timecode {
+    pub fn from_string(tc_string: String) -> Timecode {
         Timecode {
             timecode: tc_string,
             monday: None,

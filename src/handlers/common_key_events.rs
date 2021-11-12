@@ -33,6 +33,9 @@ pub fn inc_event(key: Key) -> bool {
 pub fn dec_event(key: Key) -> bool {
     matches!(key, Key::Char('J') | Key::ShiftDown)
 }
+pub fn new_timecode_event(key: Key) -> bool {
+    matches!(key, Key::Char('N'))
+}
 pub fn num_event(c: char) -> bool {
     matches!(c, '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9')
 }
