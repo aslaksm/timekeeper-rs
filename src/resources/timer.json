@@ -16,7 +16,7 @@
           "comment": "Hei hei"
         },
         "thursday": {
-          "hours": 7.5,
+          "hours": 6.0,
           "comment": "På torsdag gjorde jeg mye gøy!!"
         },
         "friday": {
@@ -48,6 +48,10 @@
         },
         "friday": {
           "hours": 7.5,
+          "comment": "En liten kommentar om hva jeg gjorde....?"
+        },
+        "saturday": {
+          "hours": 0.0,
           "comment": ""
         }
       }

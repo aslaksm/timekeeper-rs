@@ -7,12 +7,11 @@ use tui::Frame;
 
 use crate::app::{App, Day};
 
-pub fn draw_top_bar<B>(f: &mut Frame<B>, app: &App, main_layout: &Vec<Rect>)
+pub fn draw_top_bar<B>(f: &mut Frame<B>, app: &App, layout: &Rect)
 where
     B: Backend,
 {
     let t_width = f.size().width;
-    // let t_height = f.size().height;
 
     let top_bar_layout = Layout::default()
         .direction(Direction::Horizontal)
@@ -30,7 +29,7 @@ where
             ]
             .as_ref(),
         )
-        .split(main_layout[0]);
+        .split(*layout);
 
     // RENDER: Cur week and year
     let year_week_spans = Spans::from(vec![

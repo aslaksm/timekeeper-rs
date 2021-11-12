@@ -7,7 +7,7 @@ use tui::Frame;
 
 use crate::app::{App, Day};
 
-pub fn draw_top_bar<B>(f: &mut Frame<B>, app: &App, main_layout: &Vec<Rect>)
+pub fn draw_timecode_labels<B>(f: &mut Frame<B>, app: &App, layout: &Rect)
 where
     B: Backend,
 {
@@ -24,18 +24,10 @@ where
             ]
             .as_ref(),
         )
-        .split(content_layout[0]);
+        .split(*layout);
 
-    for (idx, tc) in app.get_active_week().iter().enumerate() {
-        codes.push(tc.timecode.clone());
-        handle(&tc.monday, 0);
-        handle(&tc.tuesday, 1);
-        handle(&tc.wednesday, 2);
-        handle(&tc.thursday, 3);
-        handle(&tc.friday, 4);
-        handle(&tc.saturday, 5);
-        handle(&tc.sunday, 6);
-
+    let week = app.get_active_week().expect("ERR: Active week not found!");
+    for (idx, tc) in week.0.iter().enumerate() {
         // RENDER: Timecode labels
         let tc_str = if app.active_timecode == idx {
             Paragraph::new(tc.timecode.clone())
