@@ -1,5 +1,8 @@
 use crate::event::Key;
 
+/* XXX: Some of these are useful, particularly if i'm going to add
+ * custom keybinds down the line. But atm a lot of these are kind of pointless
+ */
 pub fn down_event(key: Key) -> bool {
     matches!(key, Key::Down | Key::Char('j'))
 }

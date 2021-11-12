@@ -22,7 +22,9 @@ pub fn handle_browsing(key: Key, app: &mut App) {
         k if common_key_events::toggle_comment_event(k) => app.toggle_writing_comment(),
         k if common_key_events::inc_event(k) => app.change_hours(0.5),
         k if common_key_events::dec_event(k) => app.change_hours(-0.5),
-        k if common_key_events::new_timecode_event(k) => app.add_timecode(String::from("Halla")),
+        Key::Char(' ') => app.set_hours(7.5),
+
+        k if common_key_events::new_timecode_event(k) => app.toggle_adding_timecode(),
         Key::Char(c) if common_key_events::num_event(c) => {
             app.set_hours(c.to_digit(10).unwrap() as f32)
         }
@@ -42,7 +44,7 @@ pub fn handle_comment_input(key: Key, app: &mut App) {
 pub fn handle_timecode_input(key: Key, app: &mut App) {
     match key {
         Key::Char(c) => app.append_char_to_timecode_buffer(c),
-        Key::Esc => app.toggle_adding_timecode(),
+        Key::Esc | Key::Enter => app.toggle_adding_timecode(),
         Key::Backspace => app.delete_char_from_timecode_buffer(),
         _ => (),
     }

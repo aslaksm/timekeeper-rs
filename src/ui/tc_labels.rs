@@ -1,7 +1,8 @@
-use crate::app::App;
+use crate::app::{App, State};
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Modifier, Style};
+use tui::text::{Span, Spans};
 use tui::widgets::{Block, Borders, Paragraph, Wrap};
 use tui::Frame;
 
@@ -27,7 +28,7 @@ where
     let week = app.get_active_week().expect("ERR: Active week not found!");
     for (idx, tc) in week.0.iter().enumerate() {
         // RENDER: Timecode labels
-        let tc_str = if app.active_timecode == idx {
+        let tc_str = if app.active_timecode == idx && app.get_state() != &State::AddingTimecode {
             Paragraph::new(tc.timecode.clone())
                 .wrap(Wrap { trim: true })
                 .style(Style::default().add_modifier(Modifier::BOLD))
@@ -38,5 +39,21 @@ where
                 .block(Block::default().borders(Borders::ALL))
         };
         f.render_widget(tc_str, tc_layout[idx])
+    }
+
+    if app.get_state() == &State::AddingTimecode {
+        let text = Spans::from(vec![
+            Span::styled(app.timecode_buffer.clone(), Style::default()),
+            Span::styled(
+                String::from("|"),
+                Style::default().add_modifier(Modifier::SLOW_BLINK),
+            ),
+        ]);
+
+        let tc_str = Paragraph::new(text)
+            .wrap(Wrap { trim: true })
+            .style(Style::default().add_modifier(Modifier::BOLD))
+            .block(Block::default().borders(Borders::ALL));
+        f.render_widget(tc_str, tc_layout[week.0.len()])
     }
 }

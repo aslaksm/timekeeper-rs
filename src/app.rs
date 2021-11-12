@@ -1,7 +1,6 @@
-use crate::config::{self, Config};
+use crate::config::Config;
 use crate::timekeeper_data::{Day, Timecode, TimekeeperData, Week, Year};
 use chrono::Datelike;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
@@ -83,13 +82,6 @@ impl App {
         .get(self.active_day)?;
         Some(a)
     }
-    pub fn add_timecode(&mut self, timecode: String) {
-        self.conf.add_timecode(timecode.clone());
-        let tc = Timecode::from_string(timecode);
-        self.data
-            .add_timecode(self.active_week, self.active_year, tc);
-    }
-    // pub fn remove_timecode(&mut self) {}
 
     pub fn next_timecode(&mut self) {
         if self.timecodes.len() != 0 && self.active_timecode < self.timecodes.len() - 1 {
@@ -229,11 +221,9 @@ impl App {
     pub fn delete_char_from_comment(&mut self) {
         self.get_active_day_mut().unwrap().comment.pop();
     }
+    // XXX: Might be superfluous
     pub fn should_show_cursor(&self) -> bool {
-        matches!(
-            self.get_state(),
-            State::WritingComment | State::AddingTimecode
-        )
+        matches!(self.get_state(), State::WritingComment)
     }
     pub fn append_char_to_timecode_buffer(&mut self, c: char) {
         self.timecode_buffer.push(c);
@@ -253,4 +243,12 @@ impl App {
             self.state.pop();
         }
     }
+    pub fn add_timecode(&mut self, timecode: String) {
+        self.timecodes.push(timecode.clone());
+        self.conf.add_timecode(timecode.clone());
+        let tc = Timecode::from_string(timecode);
+        self.data
+            .add_timecode(self.active_week, self.active_year, tc);
+    }
+    // pub fn remove_timecode(&mut self) {}
 }
