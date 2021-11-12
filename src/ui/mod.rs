@@ -28,7 +28,7 @@ where
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Length(2),
+                Constraint::Length(3),
                 Constraint::Length(3),
                 Constraint::Min(5),
                 Constraint::Length(3),
