@@ -11,6 +11,7 @@ where
     B: Backend,
 {
     // Dag-inndelinger
+    // TODO: Base off of height atm instead of percentage, which is unreliable
     let make_day_layout = |idx: usize| {
         Layout::default()
             .direction(Direction::Vertical)
@@ -51,19 +52,24 @@ where
         handle(&tc.sunday, 6);
     }
 
-    // RENDER: Main content (hours and day-labels)
+    let offset = (app.active_timecode as i32 - 4).max(0) as usize;
+    let offset_end = offset + (app.timecodes.len() as i32).min(5) as usize;
+
+    // For day in week
     for idx in 0..7 {
-        for (tc_idx, d) in days[idx].iter().enumerate() {
-            let (block, style) = if tc_idx == app.active_timecode && idx as u8 == app.active_day {
-                (
-                    Block::default()
-                        .borders(Borders::ALL)
-                        .border_type(BorderType::Thick),
-                    Style::default().add_modifier(Modifier::BOLD),
-                )
-            } else {
-                (Block::default().borders(Borders::ALL), Style::default())
-            };
+        // For timecode per day
+        for (tc_idx, d) in days[idx][offset..offset_end].iter().enumerate() {
+            let (block, style) =
+                if (tc_idx + offset) == app.active_timecode && idx as u8 == app.active_day {
+                    (
+                        Block::default()
+                            .borders(Borders::ALL)
+                            .border_type(BorderType::Thick),
+                        Style::default().add_modifier(Modifier::BOLD),
+                    )
+                } else {
+                    (Block::default().borders(Borders::ALL), Style::default())
+                };
             if *d < 0.0 {
                 let p = Paragraph::new("").block(block).style(style);
                 f.render_widget(p, day_layouts[idx][tc_idx]);

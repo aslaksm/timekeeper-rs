@@ -15,21 +15,26 @@ pub enum State {
 pub struct App {
     pub data: TimekeeperData,
     pub conf: Config,
+    // Vec of timecodes shown for current week
     pub timecodes: Vec<String>,
+    // Timecodes that should be shown for every week, regardless of content
+    pub starred_timecodes: Vec<String>,
+    // Currently highlighted
     pub active_timecode: usize,
     pub active_day: u8,
     pub active_week: u8,
     pub active_year: usize,
     pub state: Vec<State>,
-    pub filepath: &'static str,
+    pub filepath: String,
+    // String buffer used when adding new timecode
     pub timecode_buffer: String,
 }
 impl App {
-    pub fn new(filepath: &'static str) -> Result<App, Box<dyn Error>> {
+    pub fn new(filepath: String) -> Result<App, Box<dyn Error>> {
         let current_date = chrono::Utc::now();
         let conf = Config::new();
 
-        let timer_js = fs::read_to_string(filepath);
+        let timer_js = fs::read_to_string(&filepath);
         let mut data: TimekeeperData = match timer_js {
             Ok(t) => serde_json::from_str(&t)?,
             _ => TimekeeperData(HashMap::<usize, Year>::new()),
@@ -38,21 +43,25 @@ impl App {
         let active_week = current_date.iso_week().week() as u8;
         let active_year = current_date.year() as usize;
         let active_day = current_date.weekday().num_days_from_monday() as u8;
-        let timecodes = data.get_timecodes(conf.timecodes.clone(), active_year, active_week);
+        let starred_timecodes = conf.starred_timecodes.clone();
 
-        data.create_week_if_not_exists(
+        data.load_week(
             active_week,
             active_year,
-            timecodes
+            starred_timecodes
                 .clone()
                 .into_iter()
                 .map(|tc| Timecode::from_string(tc))
                 .collect(),
         );
+
+        let timecodes = data.get_timecodes(active_year, active_week);
+
         Ok(App {
             data,
             conf,
             timecodes,
+            starred_timecodes,
             active_timecode: 0,
             active_day,
             active_week,
@@ -116,15 +125,16 @@ impl App {
             self.active_week = 1;
             self.next_year();
         }
-        self.data.create_week_if_not_exists(
+        self.data.load_week(
             self.active_week,
             self.active_year,
-            self.timecodes
+            self.starred_timecodes
                 .clone()
                 .into_iter()
                 .map(|tc| Timecode::from_string(tc))
                 .collect(),
         );
+        self.assign_timecodes();
     }
     pub fn prev_week(&mut self) {
         if self.active_week > 1 {
@@ -133,15 +143,23 @@ impl App {
             self.active_week = 52;
             self.prev_year();
         }
-        self.data.create_week_if_not_exists(
+        self.data.load_week(
             self.active_week,
             self.active_year,
-            self.timecodes
+            self.starred_timecodes
                 .clone()
                 .into_iter()
                 .map(|tc| Timecode::from_string(tc))
                 .collect(),
         );
+        self.assign_timecodes();
+    }
+    pub fn assign_timecodes(&mut self) {
+        self.timecodes = self.data.get_timecodes(self.active_year, self.active_week);
+        let len = self.timecodes.len();
+        if len < (self.active_timecode + 1) {
+            self.active_timecode = (len as i32 - 1).max(0) as usize
+        }
     }
     pub fn next_year(&mut self) {
         self.active_year += 1;
@@ -152,6 +170,9 @@ impl App {
     }
 
     pub fn toggle_writing_comment(&mut self) {
+        if self.timecodes.len() == 0 {
+            return;
+        }
         if self.get_state() == &State::Browsing {
             self.state.push(State::WritingComment);
             let day_idx = self.active_day;
@@ -187,7 +208,7 @@ impl App {
                     t.set_day(act, new_day)
                 }
             },
-            None => panic!("ERR: No active timecode!"),
+            None => (),
         }
     }
 
@@ -204,7 +225,7 @@ impl App {
                     t.set_day(act, new_day)
                 }
             },
-            None => panic!("ERR: No active timecode!"),
+            None => (),
         }
     }
 
@@ -248,17 +269,39 @@ impl App {
         self.state.pop();
     }
     pub fn add_timecode(&mut self, timecode: String) {
-        self.timecodes.push(timecode.clone());
-        self.conf.add_timecode(timecode.clone());
-        let tc = Timecode::from_string(timecode);
-        self.data
-            .add_timecode(self.active_week, self.active_year, tc);
+        if !self.timecodes.contains(&timecode) {
+            self.timecodes.push(timecode.clone());
+            let tc = Timecode::from_string(timecode);
+            self.data
+                .add_timecode(self.active_week, self.active_year, tc);
+        } else {
+            // TODO: Show error message in info box
+            // Cannot add timecode with existing name!
+            ()
+        }
     }
-    pub fn remove_timecode(&mut self) {
-        let timecode = self.timecodes[self.active_timecode].clone();
-        self.conf.remove_timecode(&timecode);
-        self.timecodes.retain(|tc| tc != &timecode);
-        self.data
-            .remove_timecode(self.active_week, self.active_year, timecode);
+
+    pub fn star_timecode(&mut self) {
+        if let Some(tc) = self.get_cur_timecode() {
+            if !self.starred_timecodes.contains(&tc) {
+                self.starred_timecodes.push(tc.clone());
+                self.conf.add_timecode(tc);
+            }
+        }
+    }
+
+    pub fn unstar_timecode(&mut self) {
+        if let Some(tc) = self.get_cur_timecode() {
+            self.starred_timecodes.retain(|t| t != &tc);
+            self.conf.remove_timecode(&tc);
+        }
+    }
+
+    pub fn get_cur_timecode(&self) -> Option<String> {
+        if self.timecodes.len() > self.active_timecode {
+            Some(self.timecodes[self.active_timecode].clone())
+        } else {
+            None
+        }
     }
 }

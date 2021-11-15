@@ -16,14 +16,18 @@ pub fn handle_browsing(key: Key, app: &mut App) {
         k if common_key_events::up_event(k) => app.prev_timecode(),
         k if common_key_events::left_event(k) => app.prev_day(),
         k if common_key_events::right_event(k) => app.next_day(),
+        // TODO
+        // k if common_key_events::shift_left_event(k) => app.prev_week(),
+        // k if common_key_events::shift_right_event(k) => app.next_week(),
         k if common_key_events::save_event(k) => app.write(),
         k if common_key_events::toggle_comment_event(k) => app.toggle_writing_comment(),
         k if common_key_events::inc_event(k) => app.change_hours(0.5),
         k if common_key_events::dec_event(k) => app.change_hours(-0.5),
         Key::Char(' ') => app.set_hours(7.5),
-        Key::Char('D') => app.remove_timecode(),
-        Key::Backspace => app.set_hours(0.0),
         k if common_key_events::new_timecode_event(k) => app.toggle_adding_timecode(),
+        Key::Char('S') => app.star_timecode(),
+        Key::Char('U') => app.unstar_timecode(),
+        Key::Backspace => app.set_hours(0.0),
         Key::Char(c) if common_key_events::num_event(c) => {
             app.set_hours(c.to_digit(10).unwrap() as f32)
         }

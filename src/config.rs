@@ -9,7 +9,7 @@ const DEFAULT_WINDOWS_CONF_PATH: &'static str = "/timekeeper/conf.json";
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    pub timecodes: Vec<String>,
+    pub starred_timecodes: Vec<String>,
     // lang: Languages
 }
 impl Config {
@@ -21,7 +21,9 @@ impl Config {
             Ok(c) => serde_json::from_str(&c).expect("ERR: config file corrupted!"),
             _ => {
                 // TODO: When this expands, impl default for config
-                let new_conf = Config { timecodes: vec![] };
+                let new_conf = Config {
+                    starred_timecodes: vec![],
+                };
                 fs::write(
                     &filepath,
                     serde_json::to_string_pretty(&new_conf)
@@ -50,11 +52,13 @@ impl Config {
     }
 
     pub fn add_timecode(&mut self, timecode: String) {
-        self.timecodes.push(timecode);
-        self.write();
+        if !self.starred_timecodes.contains(&timecode) {
+            self.starred_timecodes.push(timecode);
+            self.write();
+        }
     }
     pub fn remove_timecode(&mut self, timecode: &String) {
-        self.timecodes.retain(|tc| tc != timecode);
+        self.starred_timecodes.retain(|tc| tc != timecode);
         self.write();
     }
     pub fn write(&self) {

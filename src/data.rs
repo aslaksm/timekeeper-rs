@@ -13,24 +13,14 @@ impl TimekeeperData {
         Some(self.0.get_mut(&year)?)
     }
 
-    pub fn get_timecodes(&self, conf_timecodes: Vec<String>, year: usize, week: u8) -> Vec<String> {
-        let tcs = self.get(year).and_then(|y| y.get(week));
-        let mut tcs = match tcs {
-            Some(w) => w.0.iter().map(|t| t.timecode.clone()).collect(),
-            None => vec![],
-        };
-        // XXX: This may cause different ordering depending on circumstances
-        for code in conf_timecodes {
-            if !tcs.contains(&code) {
-                tcs.push(code);
-            }
-        }
-        tcs
+    // Gets timecodes of currently active week.
+    pub fn get_timecodes(&self, year: usize, week: u8) -> Vec<String> {
+        let week = self.get(year).unwrap().get(week).unwrap();
+        week.0.iter().map(|t| t.timecode.clone()).collect()
     }
 
     pub fn add_timecode(&mut self, week: u8, year: usize, timecode: Timecode) {
-        let a = self
-            .get_mut(year)
+        self.get_mut(year)
             .unwrap()
             .get_mut(week)
             .unwrap()
@@ -38,26 +28,31 @@ impl TimekeeperData {
             .push(timecode);
     }
 
-    pub fn remove_timecode(&mut self, week: u8, year: usize, timecode: String) {
-        self.get_mut(year)
-            .unwrap()
-            .get_mut(week)
-            .unwrap()
-            .0
-            .retain(|tc| tc.timecode != timecode);
-    }
+    // pub fn remove_timecode(&mut self, week: u8, year: usize, timecode: String) {
+    //     self.get_mut(year)
+    //         .unwrap()
+    //         .get_mut(week)
+    //         .unwrap()
+    //         .0
+    //         .retain(|tc| tc.timecode != timecode);
+    // }
 
-    pub fn create_week_if_not_exists(&mut self, week: u8, year: usize, timecodes: Vec<Timecode>) {
+    // Adds starred timecodes to current week, or creates new week if no exists
+    // TODO: Timecode with all days set to null should not load/be shown
+    pub fn load_week(&mut self, week: u8, year: usize, starred_timecodes: Vec<Timecode>) {
         let year_data = self
             .0
             .entry(year)
             .or_insert(Year(HashMap::<u8, Week>::new()));
         match year_data.0.get_mut(&week) {
             Some(w) => {
-                w.add_timecodes(timecodes);
+                w.remove_empty();
+                w.add_timecodes(starred_timecodes);
             }
             None => {
-                year_data.0.insert(week, Week(timecodes));
+                let mut w = Week(vec![]);
+                w.add_timecodes(starred_timecodes);
+                year_data.0.insert(week, w);
             }
         };
     }
@@ -91,15 +86,21 @@ impl Week {
             None
         }
     }
+    // TODO: Figure out how to do timecode ordering
     pub fn add_timecodes(&mut self, timecodes: Vec<Timecode>) {
-        for new_tc in timecodes {
+        for new_tc in timecodes.into_iter() {
             if let None = self.0.iter().find(|tc| tc.timecode == new_tc.timecode) {
+                // self.0.insert(0, new_tc);
                 self.0.push(new_tc);
             }
         }
     }
+    pub fn remove_empty(&mut self) {
+        self.0.retain(|tc| !tc.is_empty());
+    }
 }
 
+// TODO: Timecodes with no content (i.e. all days are None) should not serialize
 #[derive(Serialize, Deserialize)]
 pub struct Timecode {
     pub timecode: String,
@@ -155,6 +156,20 @@ impl Timecode {
             5 => self.saturday = day,
             6 => self.sunday = day,
             _ => panic!("ERR: Invalid date passed to set_day!"),
+        }
+    }
+    pub fn is_empty(&self) -> bool {
+        if self.monday.is_some()
+            || self.tuesday.is_some()
+            || self.wednesday.is_some()
+            || self.thursday.is_some()
+            || self.friday.is_some()
+            || self.saturday.is_some()
+            || self.sunday.is_some()
+        {
+            false
+        } else {
+            true
         }
     }
     // impl From seems too implicit for this

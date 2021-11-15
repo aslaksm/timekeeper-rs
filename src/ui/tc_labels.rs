@@ -1,7 +1,7 @@
 use crate::app::{App, State};
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
-use tui::style::{Modifier, Style};
+use tui::style::{Color, Modifier, Style};
 use tui::text::{Span, Spans};
 use tui::widgets::{Block, Borders, Paragraph, Wrap};
 use tui::Frame;
@@ -25,19 +25,28 @@ where
         )
         .split(*layout);
 
+    let fav_style = Style::default().fg(Color::Green);
+    let offset = (app.active_timecode as i32 - 4).max(0) as usize;
+    let offset_end = offset + (app.timecodes.len() as i32).min(5) as usize;
+
     let week = app.get_active_week().expect("ERR: Active week not found!");
-    for (idx, tc) in week.0.iter().enumerate() {
-        // RENDER: Timecode labels
-        let tc_str = if app.active_timecode == idx && app.get_state() != &State::AddingTimecode {
-            Paragraph::new(tc.timecode.clone())
-                .wrap(Wrap { trim: true })
-                .style(Style::default().add_modifier(Modifier::BOLD))
-                .block(Block::default().borders(Borders::ALL))
+    for (idx, tc) in week.0[offset..offset_end].iter().enumerate() {
+        let style = if app.starred_timecodes.contains(&app.timecodes[idx]) {
+            fav_style
         } else {
-            Paragraph::new(tc.timecode.clone())
-                .wrap(Wrap { trim: true })
-                .block(Block::default().borders(Borders::ALL))
+            Style::default()
         };
+        let tc_str =
+            if app.active_timecode == (idx + offset) && app.get_state() != &State::AddingTimecode {
+                Paragraph::new(tc.timecode.clone())
+                    .wrap(Wrap { trim: true })
+                    .style(Style::default().add_modifier(Modifier::BOLD))
+                    .block(Block::default().borders(Borders::ALL).border_style(style))
+            } else {
+                Paragraph::new(tc.timecode.clone())
+                    .wrap(Wrap { trim: true })
+                    .block(Block::default().borders(Borders::ALL).border_style(style))
+            };
         f.render_widget(tc_str, tc_layout[idx])
     }
 
