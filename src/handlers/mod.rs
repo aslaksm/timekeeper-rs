@@ -7,6 +7,8 @@ pub fn handle_app(key: Key, app: &mut App) {
         State::Browsing => handle_browsing(key, app),
         State::WritingComment => handle_comment_input(key, app),
         State::AddingTimecode => handle_timecode_input(key, app),
+        State::ControlScreen => handle_controlscreen_input(key, app),
+        _ => (),
     }
 }
 
@@ -23,6 +25,8 @@ pub fn handle_browsing(key: Key, app: &mut App) {
         k if common_key_events::toggle_comment_event(k) => app.toggle_writing_comment(),
         k if common_key_events::inc_event(k) => app.change_hours(0.5),
         k if common_key_events::dec_event(k) => app.change_hours(-0.5),
+        k if common_key_events::quit_event(k) => app.quit(),
+        Key::Char('?') => app.toggle_view_controls(),
         Key::Char(' ') => app.set_hours(7.5),
         k if common_key_events::new_timecode_event(k) => app.toggle_adding_timecode(),
         Key::Char('S') => app.star_timecode(),
@@ -50,6 +54,13 @@ pub fn handle_timecode_input(key: Key, app: &mut App) {
         Key::Esc => app.cancel_adding_timecode(),
         Key::Enter => app.toggle_adding_timecode(),
         Key::Backspace => app.delete_char_from_timecode_buffer(),
+        _ => (),
+    }
+}
+
+pub fn handle_controlscreen_input(key: Key, app: &mut App) {
+    match key {
+        Key::Esc | Key::Char('?') => app.toggle_view_controls(),
         _ => (),
     }
 }

@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::i18n::I18n;
 use tui::backend::Backend;
 use tui::layout::{Alignment, Rect};
 use tui::style::{Color, Modifier, Style};
@@ -33,7 +34,7 @@ where
             Block::default()
                 .borders(Borders::LEFT)
                 .style(Style::default().fg(Color::Reset))
-                .title("Kommentar")
+                .title(I18n::comment_label(&app.conf.lang))
                 .border_type(BorderType::Plain),
         );
     f.render_widget(comment_box, *layout);

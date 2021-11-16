@@ -15,6 +15,10 @@ where
         .direction(Direction::Vertical)
         .constraints(
             [
+                /* XXX: Percentage divides the area into 5 chunks as best as it can.
+                 * There are some inconsistencies depending on resolution, but using
+                 * fixed size based on height doesn't really fix the issue.
+                 */
                 Constraint::Percentage(20),
                 Constraint::Percentage(20),
                 Constraint::Percentage(20),

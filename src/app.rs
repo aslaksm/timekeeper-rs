@@ -10,6 +10,8 @@ pub enum State {
     Browsing,
     WritingComment,
     AddingTimecode,
+    ControlScreen,
+    Quit,
 }
 
 pub struct App {
@@ -330,5 +332,25 @@ impl App {
         } else {
             None
         }
+    }
+
+    pub fn toggle_view_controls(&mut self) {
+        match self.get_state() {
+            State::Browsing => {
+                if !self.conf.has_seen_info {
+                    self.conf.has_seen_info = true;
+                    self.conf.write();
+                }
+                self.state.push(State::ControlScreen);
+            }
+            State::ControlScreen => {
+                self.state.pop();
+            }
+            _ => (),
+        };
+    }
+
+    pub fn quit(&mut self) {
+        self.state.push(State::Quit);
     }
 }

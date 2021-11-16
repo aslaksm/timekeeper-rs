@@ -10,7 +10,8 @@ const DEFAULT_WINDOWS_CONF_PATH: &'static str = "/timekeeper/conf.json";
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub starred_timecodes: Vec<String>,
-    // lang: Languages
+    pub lang: Language,
+    pub has_seen_info: bool,
 }
 impl Config {
     pub fn new() -> Self {
@@ -22,7 +23,9 @@ impl Config {
             _ => {
                 // TODO: When this expands, impl default for config
                 let new_conf = Config {
+                    lang: Language::English,
                     starred_timecodes: vec![],
+                    has_seen_info: false,
                 };
                 fs::write(
                     &filepath,
@@ -70,7 +73,8 @@ impl Config {
     }
 }
 
-enum Languages {
-    Norwegian,
+#[derive(Serialize, Deserialize)]
+pub enum Language {
+    Norsk,
     English,
 }

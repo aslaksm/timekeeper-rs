@@ -1,4 +1,5 @@
 mod comment;
+mod controls;
 mod day_headers;
 mod days;
 mod info;
@@ -6,9 +7,10 @@ mod tc_labels;
 mod top_bar;
 
 use self::comment::draw_comment;
+use self::controls::draw_control_screen;
 use self::days::draw_days;
 use self::info::draw_info;
-use crate::app::App;
+use crate::app::{App, State};
 use crate::ui::day_headers::draw_day_headers;
 use crate::ui::tc_labels::draw_timecode_labels;
 use crate::ui::top_bar::draw_top_bar;
@@ -16,14 +18,18 @@ use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout};
 use tui::Frame;
 
-// TODO: i18n
 pub fn draw_main_layout<B>(f: &mut Frame<B>, app: &App)
 where
     B: Backend,
 {
     let t_width = f.size().width;
 
-    // Hovedinndelinga
+    if app.get_state() == &State::ControlScreen {
+        draw_control_screen(f, app);
+        return;
+    }
+
+    // Main layout
     let main_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
@@ -37,7 +43,7 @@ where
         )
         .split(f.size());
 
-    // Innholdsinndelinga (timecode-label, timer, kommentar)
+    // Content layout (timecode-label, hours, comments)
     let content_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(

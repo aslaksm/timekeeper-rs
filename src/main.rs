@@ -3,6 +3,7 @@ mod config;
 mod data;
 mod event;
 mod handlers;
+mod i18n;
 mod ui;
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use crossterm::execute;
@@ -14,6 +15,8 @@ use std::error::Error;
 use std::io::{self, stdout};
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
+
+use crate::app::State;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let path = format!(
@@ -37,13 +40,18 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     terminal.draw(|f| ui::draw_main_layout(f, &app))?;
     loop {
+        if app.get_state() == &State::Quit {
+            app.write();
+            break;
+        }
         match events.next()? {
             event::Event::Input(key) => {
+                // Force quit
                 if key == event::Key::Ctrl('c') {
                     break;
-                } else {
-                    handlers::handle_app(key, &mut app);
+                    // Quit and save
                 }
+                handlers::handle_app(key, &mut app);
                 terminal.draw(|f| ui::draw_main_layout(f, &app))?;
             }
             event::Event::Tick => {
