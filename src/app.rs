@@ -19,8 +19,8 @@ pub struct App {
     pub timecodes: Vec<String>,
     // Timecodes that should be shown for every week, regardless of content
     pub starred_timecodes: Vec<String>,
-    // Max 5 timecodes shown at a time; this indicates how far down we are
-    pub timecode_offset: usize,
+    // Max 5 timecodes shown at a time; this indicates the range
+    pub timecode_range: [usize; 2],
     // Currently highlighted
     pub active_timecode: usize,
     pub active_day: u8,
@@ -58,13 +58,14 @@ impl App {
         );
 
         let timecodes = data.get_timecodes(active_year, active_week);
+        let range_end = timecodes.len().min(5);
 
         Ok(App {
             data,
             conf,
             timecodes,
             starred_timecodes,
-            timecode_offset: 0,
+            timecode_range: [0, range_end],
             active_timecode: 0,
             active_day,
             active_week,
@@ -98,16 +99,18 @@ impl App {
     pub fn next_timecode(&mut self) {
         if self.timecodes.len() != 0 && self.active_timecode < self.timecodes.len() - 1 {
             self.active_timecode += 1;
-            if self.active_timecode >= (self.timecode_offset + 5) {
-                self.timecode_offset += 1;
+            if self.active_timecode >= (self.timecode_range[1]) {
+                self.timecode_range[0] += 1;
+                self.timecode_range[1] += 1;
             }
         }
     }
     pub fn prev_timecode(&mut self) {
         if self.active_timecode > 0 {
             self.active_timecode -= 1;
-            if self.active_timecode < self.timecode_offset {
-                self.timecode_offset -= 1;
+            if self.active_timecode < (self.timecode_range[0]) {
+                self.timecode_range[0] -= 1;
+                self.timecode_range[1] -= 1;
             }
         }
     }
@@ -169,6 +172,8 @@ impl App {
         if len < (self.active_timecode + 1) {
             self.active_timecode = (len as i32 - 1).max(0) as usize
         }
+        self.timecode_range[1] = self.timecode_range[1].min(self.timecodes.len());
+        self.timecode_range[0] = (self.timecode_range[1] as i32 - 5).max(0) as usize;
     }
     pub fn next_year(&mut self) {
         self.active_year += 1;
@@ -267,15 +272,23 @@ impl App {
     pub fn toggle_adding_timecode(&mut self) {
         if self.get_state() == &State::Browsing {
             self.state.push(State::AddingTimecode);
+            self.timecode_range[0] = self.timecodes.len() - 4;
+            self.timecode_range[1] = self.timecodes.len();
         } else if self.get_state() == &State::AddingTimecode {
             self.add_timecode(self.timecode_buffer.clone());
             self.flush_timecode_buffer();
             self.state.pop();
+            self.timecode_range[0] = self.timecodes.len() - 5;
+            self.timecode_range[1] = self.timecodes.len();
+            self.active_timecode = self.timecodes.len() - 1;
         }
     }
     pub fn cancel_adding_timecode(&mut self) {
         self.flush_timecode_buffer();
         self.state.pop();
+        self.timecode_range[0] = self.timecodes.len() - 5;
+        self.timecode_range[1] = self.timecodes.len();
+        self.active_timecode = self.timecodes.len() - 1;
     }
     pub fn add_timecode(&mut self, timecode: String) {
         if !self.timecodes.contains(&timecode) {

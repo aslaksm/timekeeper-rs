@@ -52,15 +52,16 @@ where
         handle(&tc.sunday, 6);
     }
 
-    let offset = app.timecode_offset;
-    let offset_end = offset + (app.timecodes.len() as i32).min(5) as usize;
+    let start = app.timecode_range[0];
+    let end = app.timecode_range[1];
 
     // For day in week
     for idx in 0..7 {
         // For timecode per day
-        for (tc_idx, d) in days[idx][offset..offset_end].iter().enumerate() {
+        for (tc_idx, d) in days[idx][start..end].iter().enumerate() {
+            let offset_idx = tc_idx + start;
             let (block, style) =
-                if (tc_idx + offset) == app.active_timecode && idx as u8 == app.active_day {
+                if (offset_idx) == app.active_timecode && idx as u8 == app.active_day {
                     (
                         Block::default()
                             .borders(Borders::ALL)

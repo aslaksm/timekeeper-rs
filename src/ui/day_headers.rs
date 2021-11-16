@@ -55,7 +55,7 @@ where
         f.render_widget(d_header, day_header_layout[idx + 1]);
     }
 
-    if app.timecode_offset > 0 {
+    if app.timecode_range[0] > 0 {
         let up_arrow = Paragraph::new("↑")
             .block(Block::default())
             .alignment(Alignment::Center);

@@ -35,7 +35,7 @@ where
         );
     f.render_widget(info, info_layout[1]);
 
-    if (app.timecode_offset + 5) < app.timecodes.len() {
+    if (app.timecode_range[1]) < app.timecodes.len() {
         let down_arrow = Paragraph::new("↓")
             .block(Block::default())
             .alignment(Alignment::Center);

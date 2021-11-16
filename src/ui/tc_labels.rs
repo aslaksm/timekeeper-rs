@@ -26,18 +26,20 @@ where
         .split(*layout);
 
     let fav_style = Style::default().fg(Color::Green);
-    let offset = app.timecode_offset;
-    let offset_end = offset + (app.timecodes.len() as i32).min(5) as usize;
+
+    let start = app.timecode_range[0];
+    let end = app.timecode_range[1];
 
     let week = app.get_active_week().expect("ERR: Active week not found!");
-    for (idx, tc) in week.0[offset..offset_end].iter().enumerate() {
-        let style = if app.starred_timecodes.contains(&app.timecodes[idx + offset]) {
+    for (idx, tc) in week.0[start..end].iter().enumerate() {
+        let offset_idx = idx + start;
+        let style = if app.starred_timecodes.contains(&app.timecodes[offset_idx]) {
             fav_style
         } else {
             Style::default()
         };
         let tc_str =
-            if app.active_timecode == (idx + offset) && app.get_state() != &State::AddingTimecode {
+            if app.active_timecode == (offset_idx) && app.get_state() != &State::AddingTimecode {
                 Paragraph::new(tc.timecode.clone())
                     .wrap(Wrap { trim: true })
                     .style(Style::default().add_modifier(Modifier::BOLD))
@@ -63,6 +65,9 @@ where
             .wrap(Wrap { trim: true })
             .style(Style::default().add_modifier(Modifier::BOLD))
             .block(Block::default().borders(Borders::ALL));
-        f.render_widget(tc_str, tc_layout[week.0.len()])
+        f.render_widget(
+            tc_str,
+            tc_layout[app.timecode_range[1] - app.timecode_range[0]],
+        )
     }
 }
