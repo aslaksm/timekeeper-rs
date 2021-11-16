@@ -1,13 +1,11 @@
 use crate::app::App;
 use crate::i18n::I18n;
-use crate::ui::day_headers::draw_day_headers;
-use crate::ui::tc_labels::draw_timecode_labels;
-use crate::ui::top_bar::draw_top_bar;
+
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout};
-use tui::style::{Color, Modifier, Style};
+use tui::style::{Color, Style};
 use tui::text::Span;
-use tui::widgets::{Block, Borders, Cell, Paragraph, Row, Table};
+use tui::widgets::{Block, Borders, Cell, Row, Table};
 use tui::Frame;
 
 // Info screen that shows controls
@@ -43,7 +41,6 @@ where
     let rows: Vec<Row> = key_strings
         .into_iter()
         .zip(action_strings.into_iter())
-        // .map(|(a, b)| Row::new(vec![*b, *b]))
         .map(|(a, b)| Row::new(vec![Cell::from(a), Cell::from(b)]))
         .collect();
 
@@ -56,11 +53,6 @@ where
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Controls"))
         .widths(&cols);
-    // .header(
-    //     Row::new(vec!["Tast", "Kommando"])
-    //         .style(Style::default().add_modifier(Modifier::BOLD))
-    //         .bottom_margin(1),
-    // );
 
     f.render_widget(control_table, main_layout[0]);
 }

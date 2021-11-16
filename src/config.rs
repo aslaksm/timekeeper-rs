@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     env::{self, consts::OS},
     fs,
+    path::Path,
 };
 
 const DEFAULT_UNIX_CONF_PATH: &'static str = "/.config/timekeeper/conf.json";
@@ -15,7 +16,10 @@ pub struct Config {
 }
 impl Config {
     pub fn new() -> Self {
-        let filepath = Config::get_filepath();
+        let filepath_str = Config::get_filepath();
+        let filepath = Path::new(&filepath_str);
+        let prefix = filepath.parent().unwrap();
+        std::fs::create_dir_all(prefix).unwrap();
 
         let config_js = fs::read_to_string(&filepath);
         match config_js {

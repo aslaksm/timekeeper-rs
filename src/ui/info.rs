@@ -2,7 +2,7 @@ use crate::app::App;
 use crate::i18n::I18n;
 use tui::backend::Backend;
 use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Style};
+
 use tui::widgets::{Block, BorderType, Borders, Paragraph};
 use tui::Frame;
 
