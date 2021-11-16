@@ -28,15 +28,6 @@ impl TimekeeperData {
             .push(timecode);
     }
 
-    // pub fn remove_timecode(&mut self, week: u8, year: usize, timecode: String) {
-    //     self.get_mut(year)
-    //         .unwrap()
-    //         .get_mut(week)
-    //         .unwrap()
-    //         .0
-    //         .retain(|tc| tc.timecode != timecode);
-    // }
-
     // Adds starred timecodes to current week, or creates new week if no exists
     // TODO: Timecode with all days set to null should not load/be shown
     pub fn load_week(&mut self, week: u8, year: usize, starred_timecodes: Vec<Timecode>) {

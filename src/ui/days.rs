@@ -52,7 +52,7 @@ where
         handle(&tc.sunday, 6);
     }
 
-    let offset = (app.active_timecode as i32 - 4).max(0) as usize;
+    let offset = app.timecode_offset;
     let offset_end = offset + (app.timecodes.len() as i32).min(5) as usize;
 
     // For day in week

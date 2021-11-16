@@ -1,6 +1,6 @@
 use crate::app::App;
 use tui::backend::Backend;
-use tui::layout::{Constraint, Direction, Layout, Rect};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Modifier, Style};
 use tui::text::Span;
 use tui::widgets::{Block, Borders, Paragraph};
@@ -18,7 +18,6 @@ where
         .constraints(
             [
                 Constraint::Percentage(15),
-                Constraint::Length(t_width / 10),
                 Constraint::Length(t_width / 10),
                 Constraint::Length(t_width / 10),
                 Constraint::Length(t_width / 10),
@@ -54,5 +53,12 @@ where
             Paragraph::new(day).block(Block::default().borders(Borders::ALL))
         };
         f.render_widget(d_header, day_header_layout[idx + 1]);
+    }
+
+    if app.timecode_offset > 0 {
+        let up_arrow = Paragraph::new("↑")
+            .block(Block::default())
+            .alignment(Alignment::Center);
+        f.render_widget(up_arrow, day_header_layout[0]);
     }
 }

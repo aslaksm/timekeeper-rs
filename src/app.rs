@@ -19,6 +19,8 @@ pub struct App {
     pub timecodes: Vec<String>,
     // Timecodes that should be shown for every week, regardless of content
     pub starred_timecodes: Vec<String>,
+    // Max 5 timecodes shown at a time; this indicates how far down we are
+    pub timecode_offset: usize,
     // Currently highlighted
     pub active_timecode: usize,
     pub active_day: u8,
@@ -62,6 +64,7 @@ impl App {
             conf,
             timecodes,
             starred_timecodes,
+            timecode_offset: 0,
             active_timecode: 0,
             active_day,
             active_week,
@@ -95,11 +98,17 @@ impl App {
     pub fn next_timecode(&mut self) {
         if self.timecodes.len() != 0 && self.active_timecode < self.timecodes.len() - 1 {
             self.active_timecode += 1;
+            if self.active_timecode >= (self.timecode_offset + 5) {
+                self.timecode_offset += 1;
+            }
         }
     }
     pub fn prev_timecode(&mut self) {
         if self.active_timecode > 0 {
             self.active_timecode -= 1;
+            if self.active_timecode < self.timecode_offset {
+                self.timecode_offset -= 1;
+            }
         }
     }
     pub fn next_day(&mut self) {

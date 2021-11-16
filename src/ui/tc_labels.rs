@@ -26,12 +26,12 @@ where
         .split(*layout);
 
     let fav_style = Style::default().fg(Color::Green);
-    let offset = (app.active_timecode as i32 - 4).max(0) as usize;
+    let offset = app.timecode_offset;
     let offset_end = offset + (app.timecodes.len() as i32).min(5) as usize;
 
     let week = app.get_active_week().expect("ERR: Active week not found!");
     for (idx, tc) in week.0[offset..offset_end].iter().enumerate() {
-        let style = if app.starred_timecodes.contains(&app.timecodes[idx]) {
+        let style = if app.starred_timecodes.contains(&app.timecodes[idx + offset]) {
             fav_style
         } else {
             Style::default()

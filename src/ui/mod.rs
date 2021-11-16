@@ -1,13 +1,13 @@
 mod comment;
-mod controls;
 mod day_headers;
 mod days;
+mod info;
 mod tc_labels;
 mod top_bar;
 
 use self::comment::draw_comment;
-use self::controls::draw_controls;
 use self::days::draw_days;
+use self::info::draw_info;
 use crate::app::App;
 use crate::ui::day_headers::draw_day_headers;
 use crate::ui::tc_labels::draw_timecode_labels;
@@ -61,5 +61,5 @@ where
     draw_day_headers(f, app, &main_layout[1]);
     draw_days(f, app, &content_layout);
     draw_comment(f, app, &content_layout[8]);
-    draw_controls(f, app, &main_layout[3]);
+    draw_info(f, app, &main_layout[3]);
 }

@@ -19,9 +19,7 @@ where
             Span::styled(comment, Style::default().fg(Color::LightYellow)),
             Span::styled(
                 String::from("|"),
-                Style::default()
-                    .fg(Color::White)
-                    .add_modifier(Modifier::SLOW_BLINK),
+                Style::default().add_modifier(Modifier::SLOW_BLINK),
             ),
         ]
     } else {
@@ -34,8 +32,7 @@ where
         .block(
             Block::default()
                 .borders(Borders::LEFT)
-                // FIXME: Not gr8 with white background terminals
-                .style(Style::default().fg(Color::White))
+                .style(Style::default().fg(Color::Reset))
                 .title("Kommentar")
                 .border_type(BorderType::Plain),
         );
