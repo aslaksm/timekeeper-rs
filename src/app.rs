@@ -172,7 +172,12 @@ impl App {
         if len < (self.active_timecode + 1) {
             self.active_timecode = (len as i32 - 1).max(0) as usize
         }
-        self.timecode_range[1] = self.timecode_range[1].min(self.timecodes.len());
+        self.timecode_range[1] = if self.timecodes.len() > 5 && self.timecode_range[1] <= 5 {
+            5
+        } else {
+            self.timecodes.len()
+        };
+
         self.timecode_range[0] = (self.timecode_range[1] as i32 - 5).max(0) as usize;
     }
     pub fn next_year(&mut self) {
@@ -272,13 +277,13 @@ impl App {
     pub fn toggle_adding_timecode(&mut self) {
         if self.get_state() == &State::Browsing {
             self.state.push(State::AddingTimecode);
-            self.timecode_range[0] = self.timecodes.len() - 4;
+            self.timecode_range[0] = (self.timecodes.len() as i32 - 4).max(0) as usize;
             self.timecode_range[1] = self.timecodes.len();
         } else if self.get_state() == &State::AddingTimecode {
             self.add_timecode(self.timecode_buffer.clone());
             self.flush_timecode_buffer();
             self.state.pop();
-            self.timecode_range[0] = self.timecodes.len() - 5;
+            self.timecode_range[0] = (self.timecodes.len() as i32 - 5).max(0) as usize;
             self.timecode_range[1] = self.timecodes.len();
             self.active_timecode = self.timecodes.len() - 1;
         }
@@ -286,7 +291,7 @@ impl App {
     pub fn cancel_adding_timecode(&mut self) {
         self.flush_timecode_buffer();
         self.state.pop();
-        self.timecode_range[0] = self.timecodes.len() - 5;
+        self.timecode_range[0] = (self.timecodes.len() as i32 - 5).max(0) as usize;
         self.timecode_range[1] = self.timecodes.len();
         self.active_timecode = self.timecodes.len() - 1;
     }
