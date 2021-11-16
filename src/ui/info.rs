@@ -14,7 +14,6 @@ where
     if !app.conf.has_seen_info {
         let t_width = f.size().width;
 
-        // Headeren for dager (Der det står Mandag, Tirsdag etc)
         let info_layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(

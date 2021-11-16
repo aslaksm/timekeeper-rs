@@ -36,15 +36,6 @@ where
     let header = I18n::day_labels(&app.conf.lang)
         .into_iter()
         .map(|s| to_span(s));
-    // let header = vec![
-    //     to_span("Mandag"),
-    //     to_span("Tirsdag"),
-    //     to_span("Onsdag"),
-    //     to_span("Torsdag"),
-    //     to_span("Fredag"),
-    //     to_span("Lørdag"),
-    //     to_span("Søndag"),
-    // ];
 
     for (idx, day) in header.into_iter().enumerate() {
         let d_header = if app.active_day == idx as u8 {

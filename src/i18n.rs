@@ -1,7 +1,7 @@
 use crate::config::Language;
 
 // Internationalization and localization
-pub struct I18n {}
+pub struct I18n;
 impl I18n {
     pub fn day_labels(lang: &Language) -> Vec<&'static str> {
         match lang {

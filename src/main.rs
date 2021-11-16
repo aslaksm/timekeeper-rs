@@ -23,7 +23,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         "{}/.config/timekeeper/timer.json",
         env::var("HOME").expect("ERR: HOME variable not set!"),
     );
-    // let mut app = app::App::new("src/resources/timer.json")?;
     let mut app = app::App::new(path)?;
 
     let mut stdout = stdout();

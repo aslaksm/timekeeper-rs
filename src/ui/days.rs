@@ -10,8 +10,6 @@ pub fn draw_days<B>(f: &mut Frame<B>, app: &App, content_layout: &Vec<Rect>)
 where
     B: Backend,
 {
-    // Dag-inndelinger
-    // TODO: Base off of height atm instead of percentage, which is unreliable
     let make_day_layout = |idx: usize| {
         Layout::default()
             .direction(Direction::Vertical)
